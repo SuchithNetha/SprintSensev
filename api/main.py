@@ -11,23 +11,19 @@ import sys
 # We add the root folder to sys.path so we can import 'rag_engine'
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the RAG function we just wrote
+# Import database manager
 try:
+    from database.db_manager import log_prediction, get_history
     from rag_engine.query_rag import get_agile_advice
 except ImportError:
-    print("⚠️ Warning: Could not import rag_engine. Make sure query_rag.py exists.")
+    print("⚠️ Warning: Module import failed.")
 
-
-    # Fallback function if import fails
-    def get_agile_advice(role, state, wave):
-        return "AI Advice Unavailable"
-
-app = FastAPI(title="SprintSense API", version="2.0")
+app = FastAPI(title="🧠 SprintSense AI API", version="2.0", description="Cognitive Load & Management Advisor")
 
 # Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,45 +33,48 @@ app.add_middleware(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "ml_engine", "artifacts")
 
-print(f"🔄 Loading models from {ARTIFACTS_DIR}...")
-
+# Load Models
 try:
     mlp_model = joblib.load(os.path.join(ARTIFACTS_DIR, "mlp_eeg_generator.pkl"))
     rf_model = joblib.load(os.path.join(ARTIFACTS_DIR, "rf_state_classifier.pkl"))
-    print("✅ Models loaded successfully!")
+    print("✅ ML Models loaded into memory.")
 except Exception as e:
-    print(f"❌ CRITICAL ERROR: Could not load models. {e}")
-
+    print(f"❌ ML Loading Error: {e}")
 
 # --- 2. DATA SCHEMAS ---
 class AssessmentRequest(BaseModel):
-    role: str  # [NEW] Needed for RAG Context (e.g., "DevOps")
-    ticket_volume: int  # 0-3
-    deadline_proximity: int  # 0-3
-    sleep_quality: int  # 0-3
-    complexity: int  # 0-3
-    interruptions: int  # 0-3
+    name: str  # [PRO] Added name for logging
+    role: str
+    ticket_volume: int 
+    deadline_proximity: int 
+    sleep_quality: int 
+    complexity: int 
+    interruptions: int 
 
 
 class PredictionResponse(BaseModel):
     state: str
     eeg_data: dict
-    advice: str  # [NEW] The AI Advice text
+    advice: str
 
 
 # --- 3. ENDPOINTS ---
 
 @app.get("/")
 def health_check():
-    return {"status": "active", "system": "SprintSense API v2"}
+    return {"status": "active", "engine": "SprintSense 2.0", "deployment": "Railway"}
+
+
+@app.get("/history")
+def fetch_history():
+    """[PRO] Returns historical logs for trend analysis."""
+    return get_history()
 
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict_cognitive_state(data: AssessmentRequest):
     """
-    Full Pipeline:
-    1. ML: Survey -> Synthetic EEG -> Mental State
-    2. RAG: State + Context -> Groq -> Advice
+    Unified Pipeline: ML Generation -> RAG Advice -> DB Logging
     """
 
     # --- PART A: ML PREDICTION ---
@@ -87,41 +86,42 @@ def predict_cognitive_state(data: AssessmentRequest):
         data.interruptions
     ]])
 
-    # 1. Generate EEG
+    # 1. Generate EEG & State
     synthetic_eeg_raw = mlp_model.predict(input_vector)
-    eeg_values = synthetic_eeg_raw[0]  # Flatten
-
-    # 2. Predict State
+    eeg_values = synthetic_eeg_raw[0]
     state_prediction = rf_model.predict(synthetic_eeg_raw)[0]
 
-    # --- PART B: RAG ADVICE GENERATION ---
-
-    # Determine Dominant Wave (Highest value) for the prompt
-    # Index 0=Alpha, 1=Beta, 2=Delta, 3=Theta (matches training order)
+    # --- PART B: RAG ADVICE ---
     wave_names = ["Alpha", "Beta", "Delta", "Theta"]
     dominant_idx = np.argmax(eeg_values)
     dominant_wave = wave_names[dominant_idx]
 
-    # Call the RAG Engine
-    # We wrap this in try/except so the API doesn't crash if Groq is down
     try:
         ai_advice_text = get_agile_advice(data.role, state_prediction, dominant_wave)
     except Exception as e:
-        ai_advice_text = "Analysis unavailable. Please consult Scrum Master."
+        ai_advice_text = "Analysis unavailable. Context sync error."
         print(f"RAG Error: {e}")
 
-    # Return everything
+    # --- PART C: DB LOGGING [NEW PRO FEATURE] ---
+    eeg_dict = {
+        "alpha": float(eeg_values[0]),
+        "beta": float(eeg_values[1]),
+        "delta": float(eeg_values[2]),
+        "theta": float(eeg_values[3])
+    }
+    
+    try:
+        log_prediction(data.name, data.role, state_prediction, eeg_dict)
+    except Exception as e:
+        print(f"DB Logging Failed: {e}")
+
     return {
         "state": state_prediction,
-        "eeg_data": {
-            "alpha": float(eeg_values[0]),
-            "beta": float(eeg_values[1]),
-            "delta": float(eeg_values[2]),
-            "theta": float(eeg_values[3])
-        },
+        "eeg_data": eeg_dict,
         "advice": ai_advice_text
     }
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

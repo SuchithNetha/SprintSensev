@@ -104,6 +104,7 @@ def run_assessment_dialog(member_name, role, total_count):
         if submitted:
             # 1. Map Data
             payload = {
+                "name": member_name,
                 "role": role,
                 "ticket_volume": map_response_to_int(ticket_vol),
                 "deadline_proximity": map_response_to_int(deadline),
@@ -135,14 +136,75 @@ def run_assessment_dialog(member_name, role, total_count):
 
 # --- MAIN PAGE LAYOUT ---
 
+# --- MAIN PAGE LAYOUT ---
+
+def render_history_view():
+    st.title("📈 Team Stress Trends")
+    st.caption("Historical insights from the SprintSense Database")
+    
+    try:
+        # Construct the history URL by replacing 'predict' with 'history'
+        history_url = API_URL.replace("/predict", "/history")
+        response = requests.get(history_url)
+        if response.status_code == 200:
+            history_data = response.json()
+            if not history_data:
+                st.info("No historical data found. Run some assessments first!")
+                return
+            
+            df = pd.DataFrame(history_data, columns=["ID", "Timestamp", "Name", "Role", "Status", "Alpha", "Beta", "Delta", "Theta"])
+            
+            # 1. Stress Prevalence Chart
+            st.subheader("Mental State Distribution")
+            fig_pie = px.pie(df, names="Status", color="Status", 
+                            color_discrete_map={"Stressed": "#ff4b4b", "Fatigued": "#636efa", "Focused": "#00cc96", "Distracted": "#fec032"})
+            st.plotly_chart(fig_pie, use_container_width=True)
+            
+            # 2. Timeline of Stress
+            st.subheader("Cognitive Load Timeline")
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+            fig_line = px.line(df, x="Timestamp", y="Beta", color="Name", markers=True, title="Beta Wave Intensity (Stress Proxy)")
+            fig_line.update_layout(template="plotly_dark")
+            st.plotly_chart(fig_line, use_container_width=True)
+            
+            # 3. Raw Logs
+            with st.expander("View Raw Audit Logs"):
+                st.dataframe(df.sort_values("Timestamp", ascending=False), use_container_width=True)
+                
+        else:
+            st.error(f"Failed to fetch history: {response.status_code}")
+    except Exception as e:
+        st.error(f"History Engine Offline: {e}")
+
+
 def render_manager_view():
     st.title("🚀 SprintSense Setup")
+    
+    # Sidebar Navigation for Pro feel
+    with st.sidebar:
+        st.image("https://cdn-icons-png.flaticon.com/512/1693/1693746.png", width=100)
+        st.title("SprintSense 2.0")
+        nav = st.radio("Navigation", ["Setup Team", "Live Dashboard", "History & Trends"])
+        st.divider()
+        st.info("Railway Deployment Active")
 
+    if nav == "History & Trends":
+        render_history_view()
+        return
+    elif nav == "Live Dashboard":
+        if not st.session_state.team_data['members']:
+            st.warning("Please setup a team first!")
+            return
+        st.session_state.page = "dashboard"
+        render_dashboard()
+        return
+
+    # Original Setup View
     c1, c2 = st.columns([1, 2])
     with c1:
         with st.container(border=True):
             st.subheader("Create Team")
-            team_name = st.text_input("Team Name", placeholder="e.g. Delta Force")
+            team_name = st.text_input("Team Name", placeholder="e.g. Delta Force", key="team_name_input")
 
             st.divider()
             st.caption("Add Member")
@@ -157,8 +219,8 @@ def render_manager_view():
     with c2:
         st.subheader("Team Roster")
         if st.session_state.team_data['members']:
-            df = pd.DataFrame(st.session_state.team_data['members'])
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            df_members = pd.DataFrame(st.session_state.team_data['members'])
+            st.dataframe(df_members, use_container_width=True, hide_index=True)
 
             if len(st.session_state.team_data['members']) > 0 and team_name:
                 if st.button("✅ Finalize Team & Open Dashboard", type="primary"):
@@ -173,19 +235,15 @@ def render_dashboard():
     # Check if we need to run assessments
     members = st.session_state.team_data['members']
 
-    # LOGIC: If we have members but haven't finished assessments, OPEN DIALOG
     if st.session_state.current_assessment_idx < len(members):
         curr_member = members[st.session_state.current_assessment_idx]
         run_assessment_dialog(curr_member['name'], curr_member['role'], len(members))
 
-    # DASHBOARD HEADER
     st.title(f"📊 {st.session_state.team_data['name']} Health Monitor")
 
-    # If assessments are DONE, show results
     if st.session_state.current_assessment_idx >= len(members):
         results = st.session_state.temp_assessments
 
-        # 1. Team Metrics
         c1, c2, c3, c4 = st.columns(4)
         states = [r['state'] for r in results]
         stressed_count = states.count("Stressed") + states.count("Fatigued")
@@ -197,18 +255,14 @@ def render_dashboard():
 
         st.divider()
 
-        # 2. Individual Cards
         for res in results:
             with st.expander(f"👤 **{res['name']}** ({res['role']}) - Status: **{res['state']}**", expanded=True):
                 col_graph, col_advice = st.columns([2, 1])
 
                 with col_graph:
-                    # Synthetic Live Graph
-                    # We create a simple line chart based on the returned EEG power
                     x_axis = np.linspace(0, 10, 100)
-                    # Create waves with amplitude based on the API return values
                     y_alpha = np.sin(x_axis) * res['eeg_data']['alpha']
-                    y_beta = np.sin(x_axis * 3) * res['eeg_data']['beta'] + 2  # Offset
+                    y_beta = np.sin(x_axis * 3) * res['eeg_data']['beta'] + 2 
                     y_delta = np.sin(x_axis / 2) * res['eeg_data']['delta'] - 2
 
                     fig = go.Figure()
@@ -225,7 +279,6 @@ def render_dashboard():
                         st.error("Action Required: High Cognitive Load")
                     else:
                         st.success("Cognitive Load Optimal")
-
     else:
         st.info("Waiting for assessments to complete...")
 
@@ -234,7 +287,5 @@ def render_dashboard():
 if 'page' not in st.session_state:
     st.session_state.page = "setup"
 
-if st.session_state.page == "setup":
-    render_manager_view()
-else:
-    render_dashboard()
+# Always start with the manager view (which now includes sidebar nav)
+render_manager_view()
