@@ -1,0 +1,18 @@
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+build/
+dist/
+*.egg-info/
+
+# IDEs
+.idea/
+.vscode/
+
+# Project Specific
+ml_engine/artifacts/*.pkl
+rag_engine/faiss_index/

@@ -1,0 +1,18 @@
+fastapi
+uvicorn
+pydantic
+scikit-learn
+pandas
+numpy
+joblib
+groq
+streamlit
+plotly
+python-dotenv
+requests
+# RAG Dependencies
+langchain
+langchain-community
+langchain-huggingface
+faiss-cpu
+sentence-transformers

@@ -1,0 +1,93 @@
+# THE SPRINT SENSE AGILE HANDBOOK & SCRUM GUIDE
+
+## SECTION 1: CORE SCRUM VALUES
+1. Commitment: People personally commit to achieving the goals of the Scrum Team.
+2. Focus: Everyone focuses on the work of the Sprint and the goals of the Scrum Team.
+3. Openness: The Scrum Team and its stakeholders agree to be open about all the work and the challenges with performing the work.
+4. Respect: Scrum Team members respect each other to be capable, independent people.
+5. Courage: The Scrum Team members have courage to do the right thing and work on tough problems.
+
+## SECTION 2: MANAGING COGNITIVE LOAD (MENTAL STATES)
+Rule 2.1: Sustainable Pace
+Agile processes promote sustainable development. The sponsors, developers, and users should be able to maintain a constant pace indefinitely.
+- If a team member shows signs of "Fatigue" (High Delta Waves), they must be encouraged to take a break or reduce their velocity for the next Sprint.
+- Overworking leads to technical debt and burnout.
+
+Rule 2.2: Context Switching
+Focus is essential for complex tasks.
+- If a team member shows "High Stress" (High Beta Waves), it often indicates excessive context switching or interruptions.
+- The Scrum Master must protect the team from external distractions.
+- Limit Work In Progress (WIP) to prevent cognitive overload.
+
+Rule 2.3: Psychological Safety
+- "Anxiety" (High Beta/Alpha Ratio) kills innovation.
+- Team members must feel safe to admit they are stuck or do not understand a requirement.
+- If anxiety is detected, the Manager should review the "Definition of Ready" to ensure tasks are clear before assignment.
+
+## SECTION 3: SCRUM EVENTS & ARTIFACTS
+Rule 3.1: The Sprint
+A Sprint is a fixed length event of one month or less to create consistency. A new Sprint starts immediately after the conclusion of the previous Sprint.
+- During the Sprint: No changes are made that would endanger the Sprint Goal.
+- Quality goals do not decrease.
+- Scope may be clarified and re-negotiated between the Product Owner and Development Team as more is learned.
+
+Rule 3.2: Daily Scrum
+The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.
+- It is not a status meeting for management.
+- It is for the team to inspect progress toward the Sprint Goal and adapt the Sprint Backlog as necessary, adjusting the upcoming planned work.
+
+Rule 3.3: Sprint Retrospective
+The Sprint Retrospective is an opportunity for the Scrum Team to inspect itself and create a plan for improvements to be enacted during the next Sprint.
+- Inspect how the last Sprint went with regards to people, relationships, process, and tools.
+- Identify and order the major items that went well and potential improvements.
+
+## SECTION 4: ROLES & RESPONSIBILITIES
+Rule 4.1: The Product Owner
+- Maximizing the value of the product resulting from the work of the Development Team.
+- Managing the Product Backlog.
+
+Rule 4.2: The Scrum Master
+- Helping everyone understand Scrum theory, practices, rules, and values.
+- Removing impediments to the Development Team’s progress.
+- Facilitating Scrum events as requested or needed.
+
+Rule 4.3: The Developers
+- Creating a plan for the Sprint, the Sprint Backlog.
+- Instilling quality by adhering to a Definition of Done.
+- Adapting their plan each day toward the Sprint Goal.
+
+## SECTION 5: ROLE-SPECIFIC PROTOCOLS (THE "SPRINTSENSE" MATRIX)
+
+### 5.1 PROTOCOLS FOR AI & ML ENGINEERS
+**Context:** AI Engineers often face "Model Convergence Anxiety" and long wait times for training.
+- **Symptom:** High Beta Waves (Stress) + Low Confidence.
+  - **Root Cause:** Model is not learning or NaN loss.
+  - **Action:** The Manager should pair the engineer with a Senior Data Scientist for a "Architecture Review." Do not pressure for results; focus on the experiment process.
+- **Symptom:** High Delta (Fatigue) + High GPU Usage.
+  - **Root Cause:** Late night monitoring of training runs.
+  - **Action:** Automate stopping criteria. Enforce "Rest State" while models train overnight.
+
+### 5.2 PROTOCOLS FOR DEVOPS & SRE
+**Context:** DevOps roles are high-interrupt environments due to incidents and pager duty.
+- **Symptom:** Spiking Beta/Gamma Waves (Acute Stress).
+  - **Root Cause:** Active P0/P1 Incident or "Firefighting" mode.
+  - **Action:** 1. IMMUNITY: The Scrum Master must block all non-incident work.
+    2. ROTATION: If stress persists > 4 hours, swap the on-call engineer immediately.
+- **Symptom:** Chronic Theta (Distraction).
+  - **Root Cause:** Alert fatigue from too many non-critical notifications.
+  - **Action:** Review alert thresholds in the next Retrospective.
+
+### 5.3 PROTOCOLS FOR FRONTEND & BACKEND DEVS
+**Context:** Feature delivery pressure and integration hell.
+- **Symptom:** High Beta (Anxiety) + "Deadline Approaching" signal.
+  - **Root Cause:** Integration mismatch between Frontend and Backend.
+  - **Action:** "Swarming." The entire team pauses their work to help the blocked member finish the interface.
+- **Symptom:** Low Alpha (No Flow State).
+  - **Root Cause:** Too many meetings or "Context Switching."
+  - **Action:** Institute "No-Meeting Tuesdays" to allow deep work.
+
+## SECTION 6: INTERPRETING BIOMETRIC SIGNALS (EEG MAPPING)
+The SprintSense System uses synthetic EEG to measure team health.
+1. **The "Zone" (Optimal State):** Balanced Alpha and Beta waves. The user is alert but calm. Manager Action: Do not disturb.
+2. **"Burnout Risk" (Danger State):** High Delta waves during work hours. This indicates sleep deprivation. Manager Action: Send home immediately.
+3. **"Panic" (Critical State):** High Beta waves (>25Hz). This indicates "Fight or Flight." Manager Action: Remove the blocker causing the panic.
