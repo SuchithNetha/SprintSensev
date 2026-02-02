@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.env
+.idea/
+.vscode/
+ml_engine/artifacts/*.pkl
+rag_engine/faiss_index/
+node_modules/

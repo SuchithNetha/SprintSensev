@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 fastapi
 uvicorn
 pydantic
@@ -10,9 +11,9 @@ streamlit
 plotly
 python-dotenv
 requests
-# RAG Dependencies
 langchain
 langchain-community
 langchain-huggingface
 faiss-cpu
 sentence-transformers
+torch

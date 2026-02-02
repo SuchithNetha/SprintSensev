@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+
+[build.setup]
+nixPkgs = ["python310Full", "gcc"]
+
+[install]
+commands = ["pip install -r requirements.txt"]
+
+[start]
+command = "uvicorn api.main:app --host 0.0.0.0 --port $PORT"

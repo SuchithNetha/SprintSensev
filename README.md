@@ -1,3 +1,4 @@
+
 # 🧠 SprintSense: AI-Driven Cognitive Load Monitor
 
 **SprintSense** is a full-stack "Neuro-Agile" management tool designed to quantify the intangible aspects of software development: **Developer Stress and Burnout.** Instead of relying on invasive hardware, SprintSense uses a **Multi-Layer Perceptron (MLP)** to generate synthetic biometric signals (EEG) based on work-environment proxies (Jira tickets, sleep quality, deadlines). A **RAG-based AI Agent** then provides real-time, Scrum-compliant management advice to optimize team health.
@@ -61,21 +62,17 @@ docker-compose up --build
 ### 4. Production Note
 For production deployments (e.g., Render, Heroku), ensure the `API_URL` environment variable is set in the frontend service to point to your live API endpoint.
 
-## 💜 Heroku Deployment
+## 🚂 Railway Deployment
 
-Heroku works best when you deploy the **API** and **Frontend** as two separate apps.
+Railway is the recommended platform for this project as it handles the dual-service architecture well.
 
-### App 1: The API (FastAPI)
-1. Create a new app: `sprintsense-api`
-2. Set Environment Variables: `GROQ_API_KEY`
-3. Deploy the code. The `Procfile` will automatically run:
-   `web: uvicorn api.main:app --host 0.0.0.0 --port $PORT`
+### 1. Unified Deployment
+1. Connect your GitHub repository to Railway.
+2. Railway will detect the `railway.toml` file.
+3. **Variables**: Go to the **Variables** tab and add:
+   * `GROQ_API_KEY`: Your Groq key.
+   * `API_URL`: Once deployed, Railway will give you a public URL (e.g., `https://sprintsense-production.up.railway.app/predict`). Add this back as a variable.
 
-### App 2: The Dashboard (Streamlit)
-1. Create a new app: `sprintsense-ui`
-2. Set Environment Variables: 
-   * `API_URL`: `https://sprintsense-api.herokuapp.com/predict`
-   * `GROQ_API_KEY`: (Needed for initialization)
-3. Deploy the code. 
-4. **CRITICAL**: Go to the Heroku dashboard and change the "Resources" command for the web dyno to:
-   `streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0`
+### 2. Manual Start Commands
+If you want to run the UI instead of the API as the primary service, change the **Start Command** in settings to:
+`streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0`
