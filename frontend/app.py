@@ -14,14 +14,20 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SprintSense-Frontend")
 
 _raw_url = os.getenv("API_URL", "http://localhost:8000/predict")
+
+# Ensure scheme is present
 if not _raw_url.startswith(("http://", "https://")):
     _raw_url = f"https://{_raw_url}"
 
-if "/" not in _raw_url.split("//")[-1]:
+# Ensure URL ends with /predict (not just the domain)
+if not _raw_url.endswith("/predict"):
     _raw_url = _raw_url.rstrip("/") + "/predict"
 
 API_URL = _raw_url
-HEALTH_URL = API_URL.replace("/predict", "/health")
+HEALTH_URL = _raw_url.replace("/predict", "/health")
+
+# Debug: Log the constructed URL
+logger.info(f"API_URL configured as: {API_URL}")
 
 st.set_page_config(
     page_title="SprintSense AI v2.1 | Command Center",
