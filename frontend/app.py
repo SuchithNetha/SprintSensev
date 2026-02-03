@@ -143,9 +143,9 @@ def check_api_health():
 
 def map_response_to_int(response_text):
     text = response_text.lower()
-    if any(x in text for x in ["overload", "today", "constant", "diverging", "chaos", "<4h"]): return 3
-    if any(x in text for x in ["high", "3-4 days", "frequent", "stalled", "noisy", "4-5h"]): return 2
-    if any(x in text for x in ["normal", "next week", "few", "converging", "quiet", "6-7h"]): return 1
+    if any(x in text for x in ["overload", "today", "constant", "critical", "blockers", "<4h"]): return 3
+    if any(x in text for x in ["high", "3-4 days", "frequent", "complex", "4-5h"]): return 2
+    if any(x in text for x in ["normal", "next week", "few", "moderate", "6-7h"]): return 1
     return 0
 
 @st.dialog("Cognitive Assessment Console")
@@ -166,11 +166,8 @@ def run_assessment_dialog(member_name, role, total_count):
             interruptions = st.select_slider("System Noise (Interruptions)", options=["None", "Few", "Frequent", "Constant"])
 
         st.divider()
-        st.markdown(f"**Field Specifics:** {role}")
-        if role == "AI/ML Engineer":
-            complexity = st.radio("Neural Network Convergence?", ["Converging (Stable)", "Slow Convergence", "Stalled/Plateau", "Diverging/NaN (Critical)"])
-        else:
-            complexity = st.radio("Infrastructure Performance?", ["Stable", "High Latency", "Connection Errors", "Downtime/Locks"])
+        st.markdown(f"**Task Complexity for:** {role}")
+        complexity = st.radio("Current Technical Difficulty?", ["Low (Routine)", "Moderate (Some Challenges)", "High (Complex Issues)", "Critical (Blockers/Errors)"])
 
         submitted = st.form_submit_button("UNLEASH NEURAL ANALYSIS")
 
@@ -329,16 +326,21 @@ def main():
             st.subheader("Add Synthetic Node")
             col1, col2 = st.columns(2)
             name = col1.text_input("OPERATIVE NAME")
-            role = col2.selectbox("FUNCTIONAL CLASS", ["AI/ML Engineer", "Backend Developer"])
+            role = col2.text_input("FUNCTIONAL CLASS", placeholder="e.g. AI/ML Engineer")
+            
             
             if st.button("ENROLL NODE", use_container_width=True):
-                if name:
+                if name and role:
                     st.session_state.team_data['members'].append({"name": name, "role": role})
                     st.success(f"NODE {name.upper()} ACTIVE")
+                elif not name:
+                    st.warning("Please enter an operative name.")
+                elif not role:
+                    st.warning("Please enter a functional class/role.")
 
         if st.session_state.team_data['members']:
             st.subheader("Active Roster")
-            st.table(pd.DataFrame(st.session_state.team_state['members'] if 'members' in st.session_state.team_data else st.session_state.team_data['members']))
+            st.table(pd.DataFrame(st.session_state.team_data['members']))
             if st.button("INITIALIZE COMMAND CENTER", type="primary"):
                 st.rerun()
 
