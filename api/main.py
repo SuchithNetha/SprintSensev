@@ -2,7 +2,6 @@ import logging
 import time
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from .schemas import AssessmentRequest, PredictionResponse
 import joblib
 import numpy as np
@@ -27,13 +26,14 @@ try:
 except ImportError as e:
     logger.error(f"Module import failed: {e}")
 
+# --- 3. APP INITIALIZATION ---
 app = FastAPI(
     title="🧠 SprintSense AI API",
     version="2.1",
-    description="Production-ready Cognitive Load & Management Advisor"
+    description="Professional-grade Neuro-Agile API with Enhanced Validation & Observability"
 )
 
-# --- 3. MIDDLEWARE ---
+# --- 4. MIDDLEWARE ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,7 +51,7 @@ async def add_process_time_header(request: Request, call_next):
     logger.info(f"Path: {request.url.path} | Time: {process_time:.4f}s")
     return response
 
-# --- 4. RESOURCE LOADING ---
+# --- 5. RESOURCE LOADING ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "ml_engine", "artifacts")
 
@@ -68,7 +68,7 @@ async def load_resources():
     except Exception as e:
         logger.error(f"❌ ML Loading Error: {e}")
 
-# --- 5. ENDPOINTS ---
+# --- 6. ENDPOINTS (v2.1) ---
 
 @app.get("/health")
 @app.get("/")
@@ -77,12 +77,13 @@ def health_check():
         "status": "active",
         "engine": "SprintSense 2.1",
         "deployment": os.getenv("RAILWAY_ENVIRONMENT", "production"),
-        "models_loaded": mlp_model is not None
+        "models_loaded": mlp_model is not None,
+        "api_v": "2.1.0"
     }
 
 @app.get("/history")
 def fetch_history():
-    """Returns historical logs for trend analysis."""
+    """Returns historical logs for team cognitive load analysis."""
     try:
         return get_history()
     except Exception as e:
@@ -92,7 +93,7 @@ def fetch_history():
 @app.post("/predict", response_model=PredictionResponse)
 def predict_cognitive_state(data: AssessmentRequest):
     """
-    Unified Pipeline: ML Generation -> RAG Advice -> DB Logging
+    STRICT PIPELINE: Schema Validation -> ML Synthesis -> RAG Advisory -> DB Audit
     """
     if mlp_model is None or rf_model is None:
         raise HTTPException(status_code=503, detail="ML Models not initialized")
