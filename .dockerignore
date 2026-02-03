@@ -5,6 +5,10 @@ __pycache__/
 .env
 .idea/
 .vscode/
-ml_engine/artifacts/*.pkl
-rag_engine/faiss_index/
+# Note: Keep artifacts for Docker production builds if training is not part of the build process.
+# We remove them from .dockerignore so the COPY . . works for local/remote deployment. 
+# ml_engine/artifacts/*.pkl
+# rag_engine/faiss_index/
 node_modules/
+*.db
+*.log
