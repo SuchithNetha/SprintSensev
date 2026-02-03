@@ -24,7 +24,7 @@ API_URL = _raw_url
 HEALTH_URL = API_URL.replace("/predict", "/health")
 
 st.set_page_config(
-    page_title="SprintSense AI | Command Center",
+    page_title="SprintSense AI v2.1 | Command Center",
     layout="wide",
     page_icon="🧠",
     initial_sidebar_state="expanded"
